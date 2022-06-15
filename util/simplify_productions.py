@@ -75,7 +75,57 @@ def remove_unit_productions(grammar: dict, non_terminals: set):
     return grammar
 
 
-grammar, non_terminals = get_grammar_from_txt("producciones.txt")
-non_up_grammar = remove_unit_productions(grammar, non_terminals)
+def get_first_sets(grammar: dict, non_terminals: set) -> dict:
+    """
+    Gets first sets for each non-terminal symbol.
+    Goes in revers order from keys to ensure other symbols have their first() sets complete.
 
-show_grammar(non_up_grammar)
+    args
+        grammar: previously built grammar dictionary
+        non_terminals: set of all non-terminals in grammar
+
+    returns
+        first_sets: dictionary of sets with each symbol's first set
+    """
+
+    first_sets = {}  # Dictionary with first sets
+
+    pending = set()
+    # Iterate through keys in reverse order
+    for symbol in list(grammar.keys())[::-1]:
+        current_set = set()
+        for production in grammar[symbol]:
+            print(f"{symbol}\t->\t{production}")
+            first_symbol = production[0]
+            if first_symbol in non_terminals:
+                if first_symbol in first_sets.keys():
+                    current_set.union(first_sets[first_symbol])
+                else:
+                    pending.add(symbol)
+            else:
+                current_set.add(first_symbol)
+        first_sets[symbol] = current_set
+
+    print(pending)
+    for symbol in pending:
+        pending.remove(symbol)
+        current_set = set()
+        for production in grammar[symbol]:
+            print(f"{symbol}\t->\t{production}")
+            first_symbol = production[0]
+            if first_symbol in non_terminals:
+                if first_symbol in first_sets.values():
+                    current_set.union(first_sets[symbol])
+                else:
+                    pending.add(symbol)
+            else:
+                current_set.add(first_symbol)
+        first_sets[symbol] = current_set
+
+    return first_sets
+
+
+grammar, non_terminals = get_grammar_from_txt("producciones.txt")
+first_sets = get_first_sets(grammar, non_terminals)
+
+print(first_sets)

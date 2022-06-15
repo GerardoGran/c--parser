@@ -1,0 +1,33 @@
+program->declaration_list void ID ( void ) compound_stmt | void ID ( void ) compound_stmt
+declaration_list->declaration declaration_list | int ID var_declaration' | type_specifier ID ( params ) compound_stmt
+declaration->int ID var_declaration' | type_specifier ID ( params ) compound_stmt
+var_declaration->int ID var_declaration'
+var_declaration'->; | [ NUM ] ;
+type_specifier->int | void
+params->param param_list | void
+param_list->, param param_list | ε
+param->int ID param'
+param'->[ ] | ε
+compound_stmt->{ compound_stmt'
+compound_stmt'->local_declarations compound_stmt'' | statement_list } | }
+compound_stmt''->statement_list } | }
+local_declarations->var_declaration local_declarations | int ID var_declaration'
+statement_list->statement statement_list | var = expression ; | call ; | { compound_stmt' | if ( expression ) statement selection_stmt | while ( expression ) statement | return return_stmt | input var ; | output expression ;
+statement->var = expression ; | call ; | { compound_stmt' | if ( expression ) statement selection_stmt | while ( expression ) statement | return return_stmt | input var ; | output expression ;
+selection_stmt->else statement | ε
+return_stmt->; | expression ;
+var->ID var'
+var'->[ arithmetic_expression ] | ε
+expression->arithmetic_expression relop arithmetic_expression | term arithmetic_expression'
+relop-><= | < | > | >= | == | !=
+arithmetic_expression->term arithmetic_expression'
+arithmetic_expression'->addop term arithmetic_expression' | ε
+addop->+ | -
+term->factor term'
+term'->mulop factor term' | ε
+mulop->* | /
+factor->( arithmetic_expression ) | ID var' | ID ( call' | NUM
+call->ID ( call'
+call'->args ) | )
+args->arithmetic_expression args_list
+args_list->, arithmetic_expression args_list | ε

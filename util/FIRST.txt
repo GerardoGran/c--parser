@@ -1,0 +1,36 @@
+getting firsts...
+done
+FIRST(program) = {int, void}
+FIRST(declaration_list) = {int, void}
+FIRST(declaration_list') = {int, void, ε}
+FIRST(declaration) = {int, void}
+FIRST(var_declaration) = {int}
+FIRST(var_declaration') = {;, [}
+FIRST(type_specifier) = {int, void}
+FIRST(params) = {int, void}
+FIRST(param_list) = {,, ε}
+FIRST(param) = {int}
+FIRST(param') = {[, ε}
+FIRST(compound_stmt) = {{}
+FIRST(local_declarations) = {int, ε}
+FIRST(statement_list) = {return, while, ε, {, if, ID, output, input}
+FIRST(statement) = {while, input, return, {, if, ID, output}
+FIRST(statement') = {[, (, ε}
+FIRST(selection_stmt) = {ε, else}
+FIRST(return_stmt) = {NUM, ;, ID, (}
+FIRST(var) = {ID}
+FIRST(var') = {[, ε}
+FIRST(expression) = {NUM, ID, (}
+FIRST(expression') = {<, !=, >, <=, >=, ε, ==}
+FIRST(relop) = {==, <, !=, >, <=, >=}
+FIRST(arithmetic_expression) = {NUM, ID, (}
+FIRST(arithmetic_expression') = {+, ε, -}
+FIRST(addop) = {+, -}
+FIRST(term) = {NUM, ID, (}
+FIRST(term') = {*, ε, /}
+FIRST(mulop) = {*, /}
+FIRST(factor) = {NUM, ID, (}
+FIRST(factor') = {[, (, ε}
+FIRST(call) = {)}
+FIRST(args) = {NUM, ID, (}
+FIRST(args_list) = {,, ε}

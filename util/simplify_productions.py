@@ -14,6 +14,7 @@ def get_grammar_from_txt(txt_name: str) -> tuple:
 
     grammar = {}    # Empty dict for storing
     non_terminals = set()   # Set for non_terminals
+    grammar_symbols = set()
 
     for entry in productions_str:
         if entry == "":  # Empty line edge case
@@ -26,10 +27,14 @@ def get_grammar_from_txt(txt_name: str) -> tuple:
         values = []
         for prod in productions:
             prod = prod.strip()  # Remove leading and trailing whitespace
-            values.append(prod.split(" "))  # Split into array separated by " "
+            RH_symbols = prod.split(" ")  # Split into array separated by " "
+            values.append(RH_symbols)
+            grammar_symbols.update(RH_symbols)
         grammar[key] = values   # Insert into grammar
 
-    return grammar, non_terminals
+    terminals = grammar_symbols.difference(non_terminals)
+    terminals.add("$")
+    return grammar, non_terminals, terminals
 
 
 def show_grammar(grammar: dict) -> None:
@@ -188,7 +193,7 @@ def get_first_plus_sets(grammar: dict, non_terminals: set, first_sets: dict, fol
         grammar: previously built grammar dictionary
         non_terminals: set of all non-terminals in grammar
         first_sets: dictionary of sets with each symbol's first set
-        follow: dictionary of sets with each symbol's follow set
+        follow_sets: dictionary of sets with each symbol's follow set
 
     returns
         first_plus: dictionary of sets with each symbol's first_plus set
@@ -233,12 +238,56 @@ def show_sets(type: str, sets: dict, grammar: dict = None):
             print(f"{type}({key}) = {{{', '.join(sets[key])}}}")
 
 
-grammar, non_terminals = get_grammar_from_txt("producciones.txt")
+def create_parse_table(grammar: dict, non_terminals: set, terminals: set, first_plus_sets: dict):
+    """
+    Creates parse table to get transitions for parser
+
+    args
+        grammar: previously built grammar dictionary
+        non_terminals: set of all non-terminals in grammar
+        terminals: set of all terminals in grammar
+        first_plus_sets: dictionary of sets with each production's first plus set
+
+    returns
+        parse_table: dictionary of dictionaries representing de parse table
+    """
+    parse_table = {}
+
+    non_terminals_list = list(grammar.keys())
+    terminals_list = list(terminals)
+    terminals_list.sort()
+
+    n = 1
+    for nt in non_terminals_list:
+        parse_table[nt] = {}
+        for t in terminals_list:
+            parse_table[nt][t] = "ERROR"
+        for production in grammar[nt]:
+            production_key = f"{nt}->{' '.join(production)}"
+            for t in first_plus_sets[production_key]:
+                parse_table[nt][t] = n
+            n += 1
+
+    print(f"non-terminals,{','.join(terminals_list)}")
+    for nt in non_terminals_list:
+        s = f"{nt},"
+        for t in terminals_list:
+            s += f"{parse_table[nt][t]},"
+        s = s[:-1]
+        print(s)
+
+    return parse_table
+
+
+grammar, non_terminals, terminals = get_grammar_from_txt("producciones.txt")
 first_sets = get_first_sets(grammar, non_terminals)
 follow_sets = get_follow_sets(grammar, non_terminals, first_sets)
 first_plus_sets = get_first_plus_sets(
     grammar, non_terminals, first_sets, follow_sets)
+parse_table = create_parse_table(
+    grammar, non_terminals, terminals, first_plus_sets)
 
+# show_grammar(grammar)
 # show_sets("FIRST", first_sets, grammar)
 # show_sets("FOLLOW", follow_sets, grammar)
 # show_sets("FIRST+", first_plus_sets)

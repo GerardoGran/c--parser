@@ -1,5 +1,3 @@
-getting firsts...
-done
 FIRST(program) = {int, void}
 FIRST(declaration_list) = {int, void}
 FIRST(declaration_list') = {int, void, ε}

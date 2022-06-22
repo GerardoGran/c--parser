@@ -247,6 +247,20 @@ def show_sets(type: str, sets: dict, grammar: dict = None):
     return s
 
 
+def enumerate_productions(grammar: dict):
+    productions = {}
+    n = 1
+    for key in list(grammar.keys()):    # get non-terminals in order
+        for prod in grammar[key]:
+            productions[n] = [key] + prod
+            n += 1
+
+    for p in productions:
+        print(f"{p}: {productions[p][0]} -> {productions[p][1:]}")
+
+    return productions
+
+
 def create_parse_table(grammar: dict, terminals: set, first_plus_sets: dict, verbose: bool = False):
     """
     Creates parse table to get transitions for parser.
@@ -267,6 +281,7 @@ def create_parse_table(grammar: dict, terminals: set, first_plus_sets: dict, ver
     terminals_list.append('$')
 
     n = 1
+
     for nt in non_terminals_list:
         parse_table[nt] = {}
         for t in terminals_list:
@@ -300,15 +315,17 @@ def write_to_file(filename: str, write: str):
 if __name__ == "__main__":
 
     grammar, non_terminals, terminals = get_grammar_from_txt(
-        "grammar.txt")
+        "util/grammar.txt")
     # grammar = remove_unit_productions(grammar, non_terminals)
     first_sets = get_first_sets(grammar, non_terminals)
     follow_sets = get_follow_sets(grammar, non_terminals, first_sets)
     first_plus_sets = get_first_plus_sets(
         grammar, non_terminals, first_sets, follow_sets)
 
-    write_to_file("sets/FIRST.txt", show_sets("FIRST", first_sets, grammar))
-    write_to_file("sets/FOLLOW.txt", show_sets("FOLLOW", follow_sets, grammar))
-    write_to_file("sets/FIRST+.txt", show_sets("FIRST+", first_plus_sets))
+    write_to_file("util/sets/FIRST.txt",
+                  show_sets("FIRST", first_sets, grammar))
+    write_to_file("util/sets/FOLLOW.txt",
+                  show_sets("FOLLOW", follow_sets, grammar))
+    write_to_file("util/sets/FIRST+.txt", show_sets("FIRST+", first_plus_sets))
     parse_table = create_parse_table(
         grammar, terminals, first_plus_sets, verbose=True)

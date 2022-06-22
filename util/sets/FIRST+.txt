@@ -1,6 +1,6 @@
-FIRST+(program->declaration declaration_list) = {void, int}
+FIRST+(program->declaration declaration_list) = {int, void}
 FIRST+(program->ε) = {$, ε}
-FIRST+(declaration_list->declaration declaration_list) = {void, int}
+FIRST+(declaration_list->declaration declaration_list) = {int, void}
 FIRST+(declaration_list->ε) = {$, ε}
 FIRST+(declaration->int ID declaration') = {int}
 FIRST+(declaration->void ID ( params ) compound_stmt) = {void}
@@ -13,15 +13,15 @@ FIRST+(var_declaration'->[ NUM ] ;) = {[}
 FIRST+(params->param param_list) = {int}
 FIRST+(params->void) = {void}
 FIRST+(param_list->, param param_list) = {,}
-FIRST+(param_list->ε) = {), ε}
+FIRST+(param_list->ε) = {ε, )}
 FIRST+(param->int ID param') = {int}
 FIRST+(param'->[ ]) = {[}
-FIRST+(param'->ε) = {), ε, ,}
+FIRST+(param'->ε) = {ε, ), ,}
 FIRST+(compound_stmt->{ local_declarations statement_list }) = {{}
 FIRST+(local_declarations->var_declaration local_declarations) = {int}
-FIRST+(local_declarations->ε) = {output, {, ε, if, input, return, ID, while, }}
-FIRST+(statement_list->statement statement_list) = {output, {, if, ID, return, input, while}
-FIRST+(statement_list->ε) = {ε, }}
+FIRST+(local_declarations->ε) = {return, }, if, {, ε, output, input, ID, while}
+FIRST+(statement_list->statement statement_list) = {return, input, ID, if, while, {, output}
+FIRST+(statement_list->ε) = {}, ε}
 FIRST+(statement->ID statement') = {ID}
 FIRST+(statement->{ local_declarations statement_list }) = {{}
 FIRST+(statement->if ( expression ) statement selection_stmt) = {if}
@@ -29,42 +29,42 @@ FIRST+(statement->while ( expression ) statement) = {while}
 FIRST+(statement->return return_stmt) = {return}
 FIRST+(statement->input var ;) = {input}
 FIRST+(statement->output expression ;) = {output}
-FIRST+(statement'->var' = expression ;) = {[, =}
+FIRST+(statement'->var' = expression ;) = {=, [}
 FIRST+(statement'->( call ;) = {(}
 FIRST+(selection_stmt->else statement) = {else}
-FIRST+(selection_stmt->ε) = {output, {, ε, if, input, return, ID, while, }}
+FIRST+(selection_stmt->ε) = {return, }, if, {, ε, output, input, ID, while}
 FIRST+(return_stmt->;) = {;}
-FIRST+(return_stmt->expression ;) = {ID, NUM, (}
+FIRST+(return_stmt->expression ;) = {NUM, ID, (}
 FIRST+(var->ID var') = {ID}
 FIRST+(var'->[ arithmetic_expression ]) = {[}
-FIRST+(var'->ε) = {;, ε, =}
-FIRST+(expression->arithmetic_expression expression') = {ID, NUM, (}
-FIRST+(expression'->relop arithmetic_expression expression') = {<, ==, !=, >, <=, >=}
-FIRST+(expression'->ε) = {;, ), ε}
+FIRST+(var'->ε) = {ε, =, ;}
+FIRST+(expression->arithmetic_expression expression') = {NUM, ID, (}
+FIRST+(expression'->relop arithmetic_expression expression') = {<, >, >=, <=, !=, ==}
+FIRST+(expression'->ε) = {ε, ), ;}
 FIRST+(relop-><=) = {<=}
 FIRST+(relop-><) = {<}
 FIRST+(relop->>) = {>}
 FIRST+(relop->>=) = {>=}
 FIRST+(relop->==) = {==}
 FIRST+(relop->!=) = {!=}
-FIRST+(arithmetic_expression->term arithmetic_expression') = {ID, NUM, (}
-FIRST+(arithmetic_expression'->addop term arithmetic_expression') = {+, -}
-FIRST+(arithmetic_expression'->ε) = {<, ==, !=, ε, >, ,, ;, ], ), <=, >=}
+FIRST+(arithmetic_expression->term arithmetic_expression') = {NUM, ID, (}
+FIRST+(arithmetic_expression'->addop term arithmetic_expression') = {-, +}
+FIRST+(arithmetic_expression'->ε) = {<, ε, <=, ), >, >=, ,, ==, ], !=, ;}
 FIRST+(addop->+) = {+}
 FIRST+(addop->-) = {-}
-FIRST+(term->factor term') = {ID, NUM, (}
+FIRST+(term->factor term') = {NUM, ID, (}
 FIRST+(term'->mulop factor term') = {*, /}
-FIRST+(term'->ε) = {+, <, ==, !=, ε, >, ,, ;, ], ), <=, >=, -}
+FIRST+(term'->ε) = {<, ε, <=, ;, +, ), >, >=, ,, -, ], !=, ==}
 FIRST+(mulop->*) = {*}
 FIRST+(mulop->/) = {/}
 FIRST+(factor->( arithmetic_expression )) = {(}
 FIRST+(factor->ID factor') = {ID}
 FIRST+(factor->NUM) = {NUM}
 FIRST+(factor'->[ arithmetic_expression ]) = {[}
-FIRST+(factor'->ε) = {+, <, ==, !=, ε, >, ,, ;, /, ], ), <=, *, >=, -}
+FIRST+(factor'->ε) = {<, *, ], ε, <=, +, ), >=, ,, /, ==, -, >, !=, ;}
 FIRST+(factor'->( call) = {(}
-FIRST+(call->args )) = {ID, NUM, (}
+FIRST+(call->args )) = {NUM, ID, (}
 FIRST+(call->)) = {)}
-FIRST+(args->arithmetic_expression args_list) = {ID, NUM, (}
+FIRST+(args->arithmetic_expression args_list) = {NUM, ID, (}
 FIRST+(args_list->, arithmetic_expression args_list) = {,}
-FIRST+(args_list->ε) = {), ε}
+FIRST+(args_list->ε) = {ε, )}

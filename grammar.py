@@ -297,16 +297,18 @@ def write_to_file(filename: str, write: str):
     f.close()
 
 
-grammar, non_terminals, terminals = get_grammar_from_txt(
-    "grammar.txt")
-# grammar = remove_unit_productions(grammar, non_terminals)
-first_sets = get_first_sets(grammar, non_terminals)
-follow_sets = get_follow_sets(grammar, non_terminals, first_sets)
-first_plus_sets = get_first_plus_sets(
-    grammar, non_terminals, first_sets, follow_sets)
+if __name__ == "__main__":
 
-write_to_file("sets/FIRST.txt", show_sets("FIRST", first_sets, grammar))
-write_to_file("sets/FOLLOW.txt", show_sets("FOLLOW", follow_sets, grammar))
-write_to_file("sets/FIRST+.txt", show_sets("FIRST+", first_plus_sets))
-parse_table = create_parse_table(
-    grammar, terminals, first_plus_sets, verbose=True)
+    grammar, non_terminals, terminals = get_grammar_from_txt(
+        "grammar.txt")
+    # grammar = remove_unit_productions(grammar, non_terminals)
+    first_sets = get_first_sets(grammar, non_terminals)
+    follow_sets = get_follow_sets(grammar, non_terminals, first_sets)
+    first_plus_sets = get_first_plus_sets(
+        grammar, non_terminals, first_sets, follow_sets)
+
+    write_to_file("sets/FIRST.txt", show_sets("FIRST", first_sets, grammar))
+    write_to_file("sets/FOLLOW.txt", show_sets("FOLLOW", follow_sets, grammar))
+    write_to_file("sets/FIRST+.txt", show_sets("FIRST+", first_plus_sets))
+    parse_table = create_parse_table(
+        grammar, terminals, first_plus_sets, verbose=True)

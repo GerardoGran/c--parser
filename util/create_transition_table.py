@@ -33,8 +33,4 @@ def create_transition_table():
             # add dict to transition_table list
             transition_table.append(transition_dict)
 
-        # print to copy and paste in scanner.py
-        for d in transition_table:
-            print(f"{d},")
-
     return transition_table

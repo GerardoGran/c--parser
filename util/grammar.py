@@ -248,15 +248,21 @@ def show_sets(type: str, sets: dict, grammar: dict = None):
 
 
 def enumerate_productions(grammar: dict):
+    """
+    Enumerates grammar productions in {n: [production]} format
+
+    args
+        grammar: previously built grammar dictionary
+
+    returns
+        productions: grammar productions in {n: [production]} format, 1-indexed
+    """
     productions = {}
     n = 1
     for key in list(grammar.keys()):    # get non-terminals in order
         for prod in grammar[key]:
-            productions[n] = [key] + prod
+            productions[n] = prod
             n += 1
-
-    for p in productions:
-        print(f"{p}: {productions[p][0]} -> {productions[p][1:]}")
 
     return productions
 
@@ -316,7 +322,6 @@ if __name__ == "__main__":
 
     grammar, non_terminals, terminals = get_grammar_from_txt(
         "util/grammar.txt")
-    # grammar = remove_unit_productions(grammar, non_terminals)
     first_sets = get_first_sets(grammar, non_terminals)
     follow_sets = get_follow_sets(grammar, non_terminals, first_sets)
     first_plus_sets = get_first_plus_sets(

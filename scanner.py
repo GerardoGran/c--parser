@@ -36,7 +36,18 @@ def identify_char(char: str) -> str:
         return "bad_char"
 
 
-def run_scanner(code_file: str):
+def run_scanner(code_file: str, verbose: bool = False):
+    """
+    Runs the scanner.
+
+    args
+        code_file: a str with the file location and name of the source code.
+
+    returns
+        scanner_output: list of lists with tokenIDs in format [line, ID, (position in symbol table)]
+        number_symbol_table: list of numbers
+        identifier_symbol_table: list of identifiers
+    """
     # file name, change here
     code = open(code_file)
 
@@ -67,9 +78,6 @@ def run_scanner(code_file: str):
     # scanner output
     scanner_output = []
 
-    # lines of symbols
-    lines = []
-
     # empty number and identifier tables
     number_symbol_table = []
     identifier_symbol_table = []
@@ -93,7 +101,8 @@ def run_scanner(code_file: str):
 
         # ...until we reach null character, meaning EOF
         if not char and identifier == "":
-            print("End of source code file.")
+            if verbose:
+                print("End of source code file.")
             code.close()
             break
 
@@ -120,14 +129,11 @@ def run_scanner(code_file: str):
                 # remove last char from identifier
                 identifier = identifier[:-1]
 
-            # append line for token for parser use
-            lines.append(line)
-
             # check if identifier is word
             if state == 10:
                 # identifier is a keyword and is added to symbol table directly
                 if identifier in keywords:
-                    scanner_output.append(token_dict[identifier])
+                    scanner_output.append([line, token_dict[identifier]])
                 else:
                     # identifier is not a keyword and is new
                     if identifier not in identifier_symbol_table:
@@ -136,7 +142,7 @@ def run_scanner(code_file: str):
 
                     # append token 2 and entry no.
                     scanner_output.append(
-                        (2, identifier_symbol_table.index(identifier) + 1))
+                        [line, 2, identifier_symbol_table.index(identifier) + 1])
 
             # check if identifier is number
             elif state == 11:
@@ -149,10 +155,10 @@ def run_scanner(code_file: str):
 
                 # append token 1 and entry no.
                 scanner_output.append(
-                    (1, number_symbol_table.index(num) + 1))
+                    [line, 1, number_symbol_table.index(num) + 1])
 
             else:
-                scanner_output.append(token_dict[identifier])
+                scanner_output.append([line, token_dict[identifier]])
 
             state = 0
             identifier = ""
@@ -166,18 +172,17 @@ def run_scanner(code_file: str):
             # raise exception from error_messages list
             error_msg = f"{error_messages[state - 32]}: '{identifier}'"
 
-            raise Exception(f"{error_msg} in line {line}")
+            raise Exception(f"LEXICAL ERROR: {error_msg} in line {line}")
 
-    return scanner_output, number_symbol_table, identifier_symbol_table, lines
+    return scanner_output, number_symbol_table, identifier_symbol_table
 
 
 # when called as a module, run whole program
 if __name__ == "__main__":
 
-    scanner_output, number_symbol_table, identifier_symbol_table, lines = run_scanner(
+    scanner_output, number_symbol_table, identifier_symbol_table = run_scanner(
         "test/test2.txt")
 
     print(f"out = {scanner_output}")
     print(f"number_symbol_table = {number_symbol_table}")
     print(f"identifier_symbol_table = {identifier_symbol_table}")
-    print(f"lines = {lines}")

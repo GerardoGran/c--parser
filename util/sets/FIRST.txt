@@ -1,33 +1,33 @@
-FIRST(program) = {ε, int, void}
-FIRST(declaration_list) = {ε, int, void}
-FIRST(declaration) = {int, void}
-FIRST(declaration') = {(, [, ;}
+FIRST(program) = {void, ε, int}
+FIRST(declaration_list) = {void, ε, int}
+FIRST(declaration) = {void, int}
+FIRST(declaration') = {(, ;, [}
 FIRST(var_declaration) = {int}
-FIRST(var_declaration') = {[, ;}
-FIRST(params) = {int, void}
+FIRST(var_declaration') = {;, [}
+FIRST(params) = {void, int}
 FIRST(param_list) = {ε, ,}
 FIRST(param) = {int}
 FIRST(param') = {ε, [}
 FIRST(compound_stmt) = {{}
 FIRST(local_declarations) = {ε, int}
-FIRST(statement_list) = {return, input, ID, if, while, {, ε, output}
-FIRST(statement) = {return, if, {, output, input, ID, while}
-FIRST(statement') = {ε, (, [}
+FIRST(statement_list) = {while, ε, input, if, output, {, ID, return}
+FIRST(statement) = {input, output, while, if, {, ID, return}
+FIRST(statement') = {(, ε, [}
 FIRST(selection_stmt) = {ε, else}
-FIRST(return_stmt) = {NUM, ID, (, ;}
+FIRST(return_stmt) = {(, ID, ;, NUM}
 FIRST(var) = {ID}
 FIRST(var') = {[}
-FIRST(expression) = {NUM, ID, (}
-FIRST(expression') = {<, >, >=, ε, <=, !=, ==}
-FIRST(relop) = {<, <=, >=, >, !=, ==}
-FIRST(arithmetic_expression) = {NUM, ID, (}
-FIRST(arithmetic_expression') = {-, +, ε}
-FIRST(addop) = {-, +}
-FIRST(term) = {NUM, ID, (}
-FIRST(term') = {ε, *, /}
-FIRST(mulop) = {*, /}
-FIRST(factor) = {NUM, ID, (}
-FIRST(factor') = {ε, (, [}
+FIRST(expression) = {(, ID, NUM}
+FIRST(expression') = {>, <, ε, !=, <=, ==, >=}
+FIRST(relop) = {>, <=, ==, >=, <, !=}
+FIRST(arithmetic_expression) = {(, ID, NUM}
+FIRST(arithmetic_expression') = {ε, +, -}
+FIRST(addop) = {+, -}
+FIRST(term) = {(, ID, NUM}
+FIRST(term') = {/, ε, *}
+FIRST(mulop) = {/, *}
+FIRST(factor) = {(, ID, NUM}
+FIRST(factor') = {(, ε, [}
 FIRST(call) = {)}
-FIRST(args) = {NUM, ID, (}
+FIRST(args) = {(, ID, NUM}
 FIRST(args_list) = {ε, ,}

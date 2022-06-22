@@ -1,10 +1,9 @@
-program->declaration_list void ID ( void ) compound_stmt | void ID ( void ) compound_stmt
-declaration_list->declaration declaration_list'
-declaration_list'->declaration declaration_list' | ε
-declaration->int ID var_declaration' | type_specifier ID ( params ) compound_stmt
+program->declaration declaration_list | ε
+declaration_list->declaration declaration_list | ε
+declaration->int ID declaration' | void ID ( params ) compound_stmt
+declaration'->; | [ NUM ] ; | ( params ) compound_stmt
 var_declaration->int ID var_declaration'
 var_declaration'->; | [ NUM ] ;
-type_specifier->int | void
 params->param param_list | void
 param_list->, param param_list | ε
 param->int ID param'

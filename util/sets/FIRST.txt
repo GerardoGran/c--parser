@@ -1,0 +1,33 @@
+FIRST(program) = {void, ε, int}
+FIRST(declaration_list) = {void, ε, int}
+FIRST(declaration) = {void, int}
+FIRST(declaration') = {;, [, (}
+FIRST(var_declaration) = {int}
+FIRST(var_declaration') = {;, [}
+FIRST(params) = {void, int}
+FIRST(param_list) = {ε, ,}
+FIRST(param) = {int}
+FIRST(param') = {[, ε}
+FIRST(compound_stmt) = {{}
+FIRST(local_declarations) = {ε, int}
+FIRST(statement_list) = {output, {, if, ID, ε, return, input, while}
+FIRST(statement) = {output, {, if, input, return, ID, while}
+FIRST(statement') = {[, ε, (}
+FIRST(selection_stmt) = {ε, else}
+FIRST(return_stmt) = {;, ID, NUM, (}
+FIRST(var) = {ID}
+FIRST(var') = {[}
+FIRST(expression) = {ID, NUM, (}
+FIRST(expression') = {<, ==, !=, ε, >, <=, >=}
+FIRST(relop) = {<, ==, !=, >, <=, >=}
+FIRST(arithmetic_expression) = {ID, NUM, (}
+FIRST(arithmetic_expression') = {+, ε, -}
+FIRST(addop) = {+, -}
+FIRST(term) = {ID, NUM, (}
+FIRST(term') = {*, ε, /}
+FIRST(mulop) = {*, /}
+FIRST(factor) = {ID, NUM, (}
+FIRST(factor') = {[, ε, (}
+FIRST(call) = {)}
+FIRST(args) = {ID, NUM, (}
+FIRST(args_list) = {ε, ,}

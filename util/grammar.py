@@ -11,6 +11,7 @@ def get_grammar_from_txt(txt_name: str) -> tuple:
     """
     f = open(txt_name, "r")
     productions_str = f.read().split("\n")  # Arr with each V and its productions
+    f.close()
 
     grammar = {}    # Empty dict for storing
     non_terminals = set()   # Set for non_terminals
@@ -33,11 +34,11 @@ def get_grammar_from_txt(txt_name: str) -> tuple:
         grammar[key] = values   # Insert into grammar
 
     terminals = grammar_symbols.difference(non_terminals)
-    terminals.add("$")
+    terminals.remove("ε")
     return grammar, non_terminals, terminals
 
 
-def show_grammar(grammar: dict) -> None:
+def show_grammar(grammar: dict) -> str:
     """
     Prints the function in "v1->p1 | ... | pn" format.
     Can be output into a .txt file to save as new grammar.
@@ -52,11 +53,10 @@ def show_grammar(grammar: dict) -> None:
             prods.append(" ".join(prod))
         value = " | ".join(prods)
         str += f"{key}->{value}\n"
-    print(str)
-    return
+    return str
 
 
-def remove_unit_productions(grammar: dict, non_terminals: set):
+def remove_unit_productions(grammar: dict, non_terminals: set) -> dict:
     """
     Removes all unit productions in grammar.
 
@@ -200,23 +200,30 @@ def get_first_plus_sets(grammar: dict, non_terminals: set, first_sets: dict, fol
     """
     first_plus = dict()
 
-    for key in list(grammar.keys()):
-        for production in grammar[key]:
+    for key in list(grammar.keys()):    # get non-terminals in order
+        for production in grammar[key]:  # iterate over every production
+            # create key for dict
             production_key = f"{key}->{' '.join(production)}"
-            first_plus[production_key] = set()
+            first_plus[production_key] = set()  # set to empty set
+            # iterate through symbols keeping track of position to recognize last symbol
             for j, symbol in enumerate(production):
-                if symbol not in non_terminals:
+                if symbol not in non_terminals:  # if symbol is terminal, add
                     first_plus[production_key].add(
                         symbol)
+                    # if epsilon FIRST+(p) = FIRST(β) ∪ FIRST(X)
                     if symbol == "ε":
                         first_plus[production_key] = first_plus[production_key].union(
                             follow_sets[key])
+                        if key == "selection_stmt":  # do not add else in selection_stmt -> ε
+                            first_plus[production_key].remove("else")
+
                     break
                 else:
-                    if "ε" not in first_sets[symbol]:
-                        first_plus[production_key] = first_sets[symbol]
+                    if "ε" not in first_sets[symbol]:   # if only terminals, add
+                        first_plus[production_key] = first_plus[production_key].union(
+                            first_sets[symbol])
                         break
-                    else:
+                    else:   # add first set without epsilon, remain in loop
                         nt_first = first_sets[symbol]
                         nt_first.remove("ε")
                         first_plus[production_key] = nt_first.union(
@@ -230,21 +237,22 @@ def get_first_plus_sets(grammar: dict, non_terminals: set, first_sets: dict, fol
 
 
 def show_sets(type: str, sets: dict, grammar: dict = None):
+    s = ""
     if grammar:
         for symbol in grammar:
-            print(f"{type}({symbol}) = {{{', '.join(sets[symbol])}}}")
+            s += f"{type}({symbol}) = {{{', '.join(sets[symbol])}}}\n"
     else:
         for key in sets:
-            print(f"{type}({key}) = {{{', '.join(sets[key])}}}")
+            s += f"{type}({key}) = {{{', '.join(sets[key])}}}\n"
+    return s
 
 
-def create_parse_table(grammar: dict, non_terminals: set, terminals: set, first_plus_sets: dict):
+def create_parse_table(grammar: dict, terminals: set, first_plus_sets: dict, verbose: bool = False):
     """
-    Creates parse table to get transitions for parser
+    Creates parse table to get transitions for parser.
 
     args
         grammar: previously built grammar dictionary
-        non_terminals: set of all non-terminals in grammar
         terminals: set of all terminals in grammar
         first_plus_sets: dictionary of sets with each production's first plus set
 
@@ -256,6 +264,7 @@ def create_parse_table(grammar: dict, non_terminals: set, terminals: set, first_
     non_terminals_list = list(grammar.keys())
     terminals_list = list(terminals)
     terminals_list.sort()
+    terminals_list.append('$')
 
     n = 1
     for nt in non_terminals_list:
@@ -268,26 +277,36 @@ def create_parse_table(grammar: dict, non_terminals: set, terminals: set, first_
                 parse_table[nt][t] = n
             n += 1
 
-    print(f"non-terminals,{','.join(terminals_list)}")
-    for nt in non_terminals_list:
-        s = f"{nt},"
-        for t in terminals_list:
-            s += f"{parse_table[nt][t]},"
-        s = s[:-1]
-        print(s)
+    if verbose:
+        terminal_literals = map(lambda s: f'"{s}"', terminals_list)
+        write = f"non-terminals,{','.join(terminal_literals)}\n"
+        for nt in non_terminals_list:
+            s = f'{nt},'
+            for t in terminals_list:
+                s += f'"{parse_table[nt][t]}",'
+            s = s[:-1]
+            write += f'{s}\n'
+        write_to_file("parse_table.csv", write)
 
     return parse_table
 
 
-grammar, non_terminals, terminals = get_grammar_from_txt("producciones.txt")
+def write_to_file(filename: str, write: str):
+    f = open(filename, "w")
+    f.write(write)
+    f.close()
+
+
+grammar, non_terminals, terminals = get_grammar_from_txt(
+    "grammar.txt")
+# grammar = remove_unit_productions(grammar, non_terminals)
 first_sets = get_first_sets(grammar, non_terminals)
 follow_sets = get_follow_sets(grammar, non_terminals, first_sets)
 first_plus_sets = get_first_plus_sets(
     grammar, non_terminals, first_sets, follow_sets)
-parse_table = create_parse_table(
-    grammar, non_terminals, terminals, first_plus_sets)
 
-# show_grammar(grammar)
-# show_sets("FIRST", first_sets, grammar)
-# show_sets("FOLLOW", follow_sets, grammar)
-# show_sets("FIRST+", first_plus_sets)
+write_to_file("sets/FIRST.txt", show_sets("FIRST", first_sets, grammar))
+write_to_file("sets/FOLLOW.txt", show_sets("FOLLOW", follow_sets, grammar))
+write_to_file("sets/FIRST+.txt", show_sets("FIRST+", first_plus_sets))
+parse_table = create_parse_table(
+    grammar, terminals, first_plus_sets, verbose=True)

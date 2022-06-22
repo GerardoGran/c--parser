@@ -1,39 +1,6 @@
 from util.create_transition_table import create_transition_table
 from util.token_dict import create_token_dict
 
-# list of dictionaries to represent transition table
-# usage: transition_table[current_state][current_char]
-
-transition_table = create_transition_table()
-
-# states that reach acceptor states with delims, nums or letters
-delim_ended_states = [10, 11, 13, 15, 17, 22]
-
-# token dictionary to translate into symbol table and output
-token_dict = create_token_dict()
-
-# keyword list to check if an identifier is a keyword
-keywords = ['if', 'else', 'void', 'return', 'int', 'while', 'input', 'output']
-
-# identifier type groups
-whitespace = [" ", "\t", "\n", ""]
-accepted_chars = ['!', '<', '>', '=', '+', '-', '*',
-                  '/', ',', ';', '(', ')', '[', ']', '{', '}']
-
-# error messages
-error_messages = ['Invalid Char', 'Identifiers cannot have numbers',
-                  'Numbers cannot have letters', "expected '='"]
-
-# scanner output
-scanner_output = []
-
-# lines of symbols
-lines = []
-
-# empty number and identifier tables
-number_symbol_table = []
-identifier_symbol_table = []
-
 
 def identify_char(char: str) -> str:
     """Identifies char to use in transition table.
@@ -46,6 +13,10 @@ def identify_char(char: str) -> str:
     Returns:
         A string identifying if the char is a letter, digit, or itself if otherwise.
     """
+    # identifier type groups
+    whitespace = [" ", "\t", "\n", ""]
+    accepted_chars = ['!', '<', '>', '=', '+', '-', '*',
+                      '/', ',', ';', '(', ')', '[', ']', '{', '}']
 
     # return letter for transition table if char is a letter
     if char.isalpha():
@@ -65,11 +36,9 @@ def identify_char(char: str) -> str:
         return "bad_char"
 
 
-# when called as a module, run whole program
-if __name__ == "__main__":
+def run_scanner(code_file: str):
     # file name, change here
-    code_file_name = "test/test2.txt"
-    code = open(code_file_name)
+    code = open(code_file)
 
     # initialize current identifier and state
     identifier = ""
@@ -78,6 +47,32 @@ if __name__ == "__main__":
     prev_char = ""
 
     line = 1
+
+    transition_table = create_transition_table()
+
+    # states that reach acceptor states with delims, nums or letters
+    delim_ended_states = [10, 11, 13, 15, 17, 22]
+
+    # token dictionary to translate into symbol table and output
+    token_dict = create_token_dict()
+
+    # keyword list to check if an identifier is a keyword
+    keywords = ['if', 'else', 'void', 'return',
+                'int', 'while', 'input', 'output']
+
+    # error messages
+    error_messages = ['Invalid Char', 'Identifiers cannot have numbers',
+                      'Numbers cannot have letters', "expected '='"]
+
+    # scanner output
+    scanner_output = []
+
+    # lines of symbols
+    lines = []
+
+    # empty number and identifier tables
+    number_symbol_table = []
+    identifier_symbol_table = []
 
     # loop forever, reading 1 char at a time...
     while True:
@@ -173,6 +168,16 @@ if __name__ == "__main__":
 
             raise Exception(f"{error_msg} in line {line}")
 
+    return scanner_output, number_symbol_table, identifier_symbol_table, lines
+
+
+# when called as a module, run whole program
+if __name__ == "__main__":
+
+    scanner_output, number_symbol_table, identifier_symbol_table, lines = run_scanner(
+        "test/test2.txt")
+
     print(f"out = {scanner_output}")
     print(f"number_symbol_table = {number_symbol_table}")
     print(f"identifier_symbol_table = {identifier_symbol_table}")
+    print(f"lines = {lines}")

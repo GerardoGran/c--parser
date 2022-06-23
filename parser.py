@@ -4,7 +4,13 @@ from scanner import run_scanner
 from util.token_dict import id_to_token
 
 
-def LL1(grammar: dict, parse_table: dict, input: list):
+def show_symbol_table(symbol_table: list):
+    for entry in symbol_table:
+        print('\t'.join(entry))
+    return
+
+
+def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
     """
     Runs LL(1) Parsing Algorithm.
 
@@ -26,6 +32,8 @@ def LL1(grammar: dict, parse_table: dict, input: list):
     stack = ['$', non_terminals[0]]  # stack with symbols to match
     input_pointer = 0   # pointer to traverse input
 
+    current_nt = ''
+
     while stack[-1] != '$':
         top = stack[-1]  # assign top to variable for legibility
         # current token from input
@@ -34,7 +42,21 @@ def LL1(grammar: dict, parse_table: dict, input: list):
         print(f'stack: {stack}\ttoken: {token}')
 
         if top == token:    # if match
-            print(f'matched {token}')
+            print(f'matched {token}. nt: {current_nt}')
+
+            if token == 'ID' and current_nt == 'declaration':  # matched global fun or var
+                next_token = id_to_token(input[input_pointer + 1][1])
+                if next_token == '(':
+                    symbol_table[input[input_pointer][2] - 1] = [symbol_table[input[input_pointer]
+                                                                              [2] - 1]] + ['function', id_to_token(input[input_pointer - 1][1])]
+                else:
+                    symbol_table[input[input_pointer][2] - 1] = [symbol_table[input[input_pointer]
+                                                                              [2] - 1]] + ['var', 'global']
+
+            if token == 'ID' and current_nt == "var_declaration":   # matched local var
+                symbol_table[input[input_pointer][2] - 1] = [
+                    symbol_table[input[input_pointer][2] - 1]] + ['var', 'local']
+
             stack.pop()  # remove from stack
             input_pointer += 1  # traverse input
 
@@ -49,14 +71,18 @@ def LL1(grammar: dict, parse_table: dict, input: list):
             production_number = parse_table[top][token]  # production to go to
             # symbols in RHS of production
             production_symbols = productions[production_number]
+            print(f'{production_symbols[0]} -> {production_symbols[1:]}')
+
+            current_nt = production_symbols[0]
 
             stack.pop()   # pop before inserting new symbols
-            if production_symbols != ["ε"]:   # do not push epsilon
+            if "ε" not in production_symbols:   # do not push epsilon
                 # insert symbols in reverse
-                stack.extend(production_symbols[::-1])
+                stack.extend(production_symbols[:0:-1])
 
     if stack[-1] == '$' and token == '$':  # program ended correctly
         print('-----------SUCCESS-----------')
+        show_symbol_table(symbol_table)
         return
     elif input_pointer >= len(input):   # input incomplete
         print(f'stack: {stack}\ttoken: {token}')
@@ -68,9 +94,9 @@ def LL1(grammar: dict, parse_table: dict, input: list):
 
 
 if __name__ == "__main__":
-    sys.tracebacklimit = 0
+    # sys.tracebacklimit = 0
 
-    code_file = "test/example2.txt"
+    code_file = "test/using.txt"
 
     # Run scanner
     scanner_output, number_symbol_table, identifier_symbol_table = run_scanner(
@@ -87,4 +113,4 @@ if __name__ == "__main__":
     parse_table = gram.create_parse_table(
         grammar, terminals, first_plus_sets)
 
-    LL1(grammar, parse_table, scanner_output)
+    LL1(grammar, parse_table, scanner_output, identifier_symbol_table)

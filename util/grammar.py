@@ -261,7 +261,7 @@ def enumerate_productions(grammar: dict):
     n = 1
     for key in list(grammar.keys()):    # get non-terminals in order
         for prod in grammar[key]:
-            productions[n] = prod
+            productions[n] = [key] + prod
             n += 1
 
     return productions

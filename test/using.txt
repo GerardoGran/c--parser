@@ -1,3 +1,20 @@
+int var;
+int otherVar;
+
+int gimmeFifty(void) {
+    int localVar;
+    int localVarTwo;
+
+    
+    localVar = 10;
+    localVarTwo = localVar + 10;
+    return 50;
+}
+
+int finalVar;
+
 void main(void) {
+    int finalLocalVar;
     int x;
+    finalLocalVar = 69;
 }

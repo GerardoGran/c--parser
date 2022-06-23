@@ -5,28 +5,34 @@ from util.token_dict import id_to_token
 
 
 def LL1(grammar: dict, parse_table: dict, input: list):
+    # Validate input
+    if len(input) == 1 and input[0][1] == 30:
+        raise Exception("INPUT: code file cannot be empty")
+
+    # input.append('$')
+
     non_terminals = list(grammar.keys())
-    stack = ['$', non_terminals[0]]
-    token = id_to_token(input.pop(0)[1])
     productions = gram.enumerate_productions(grammar)
 
-    print(f'RUNNING PARSER\nstack: {stack}\ttoken: {token}')
+    stack = ['$', non_terminals[0]]
+    input_pointer = 0
 
-    top = stack[-1]
-
-    while top != '$' and input:
+    while stack[-1] != '$':
         top = stack[-1]
+        if input_pointer < len(input):
+            token = id_to_token(input[input_pointer][1])
         print(f'stack: {stack}\ttoken: {token}')
         if top == token:
             print(f'matched {token}')
             stack.pop()
-            token = id_to_token(input.pop(0)[1])
+            input_pointer += 1
+
         elif top not in non_terminals:
             raise Exception(
-                f"STACK: Expected {top} got {token} in line {input[0][0]}")
+                f"STACK: Expected {top} got {token} in line {input[input_pointer][0]}")
         elif parse_table[top][token] == "ERROR":
             raise Exception(
-                f"TABLE: Expected {top} got {token} in line {input[0][0]}")
+                f"TABLE: Expected {top} got {token} in line {input[input_pointer][0]}")
         else:
             production_number = parse_table[top][token]  # production to go to
             # symbols in RHS of production
@@ -37,9 +43,10 @@ def LL1(grammar: dict, parse_table: dict, input: list):
                 # insert symbols in reverse
                 stack.extend(production_symbols[::-1])
 
-    if top == '$' and token == '$':  # program ended correctly
+    if stack[-1] == '$' and token == '$':  # program ended correctly
+        print('-----------SUCCESS-----------')
         return
-    elif not input:
+    elif input_pointer >= len(input):
         print(f'stack: {stack}\ttoken: {token}')
         raise Exception(
             f'INPUT: Input ended prematurely, top of stack: {stack[-1]}')
@@ -51,11 +58,11 @@ def LL1(grammar: dict, parse_table: dict, input: list):
 if __name__ == "__main__":
     sys.tracebacklimit = 0
 
-    code_file = "test/test1.txt"
+    code_file = "test/test9.txt"
 
     # Run scanner
     scanner_output, number_symbol_table, identifier_symbol_table = run_scanner(
-        code_file)
+        code_file, verbose=True)
 
     # Create Parser sets and table
     grammar, non_terminals, terminals = gram.get_grammar_from_txt(

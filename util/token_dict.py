@@ -68,5 +68,5 @@ def id_to_token(i: int) -> str:
             "]",
             "{",
             "}",
-            "Comment"]
+            "$"]
     return keys[i - 1]

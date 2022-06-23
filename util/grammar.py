@@ -295,7 +295,14 @@ def create_parse_table(grammar: dict, terminals: set, first_plus_sets: dict, ver
         for production in grammar[nt]:
             production_key = f"{nt}->{' '.join(production)}"
             for t in first_plus_sets[production_key]:
-                parse_table[nt][t] = n
+                if t == 'ε':
+                    continue
+                if parse_table[nt][t] == "ERROR":
+                    parse_table[nt][t] = n
+                else:
+                    parse_table[nt][t] = [parse_table[nt][t]].extend(n)
+                    print(f'DOUBLE ON {nt} with {t}: {parse_table[nt][t]}')
+
             n += 1
 
     if verbose:

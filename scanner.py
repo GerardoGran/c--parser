@@ -51,6 +51,9 @@ def run_scanner(code_file: str, verbose: bool = False):
     # file name, change here
     code = open(code_file)
 
+    if verbose:
+        print("RUNNING SCANNER")
+
     # initialize current identifier and state
     identifier = ""
     state = 0
@@ -104,6 +107,7 @@ def run_scanner(code_file: str, verbose: bool = False):
             if verbose:
                 print("End of source code file.")
             code.close()
+            scanner_output.append([line, 30])  # add '$' token ID
             break
 
         # translate char into transition
@@ -129,6 +133,8 @@ def run_scanner(code_file: str, verbose: bool = False):
                 # remove last char from identifier
                 identifier = identifier[:-1]
 
+            if verbose:
+                print(identifier)
             # check if identifier is word
             if state == 10:
                 # identifier is a keyword and is added to symbol table directly
@@ -173,6 +179,8 @@ def run_scanner(code_file: str, verbose: bool = False):
             error_msg = f"{error_messages[state - 32]}: '{identifier}'"
 
             raise Exception(f"LEXICAL ERROR: {error_msg} in line {line}")
+
+    print("SCANNER DONE")
 
     return scanner_output, number_symbol_table, identifier_symbol_table
 

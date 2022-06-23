@@ -34,10 +34,10 @@ void sort(int a[], int low, int high){
 
    if(x > 0) {
          /* DO a thing */
-         y = x + 1
+         y = x + 1;
    } else {
          /* do something */
-         input(x)
-         output(x)
+         input x[5];
+         output x;
    }
 }/* END of sort() */ 

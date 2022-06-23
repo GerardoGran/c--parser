@@ -4,10 +4,46 @@ from scanner import run_scanner
 from util.token_dict import id_to_token
 
 
+def last_fun_main(symbol_table: list) -> bool:
+    """
+    Traverses symbol table in reverse until a function is found. If the function is void and called main, accept. 
+    """
+    for entry in symbol_table[::-1]:
+        if entry[1] == 'function':  # last of type function
+            # last function is void main()
+            if entry[0] == 'main' and entry[2] == 'void':
+                return True
+            else:
+                return False
+
+
 def show_symbol_table(symbol_table: list):
+    """
+    Show symbol table in a readable format
+
+    args
+        symbol_table: list of identifiers in format {identifier: [type(fun/var), return type or var scope]}
+    """
     for entry in symbol_table:
         print('\t'.join(entry))
     return
+
+
+def initialize_symbol_table(symbol_table: list) -> list:
+    """
+    Initialize symbol table to be in parser format. [identifier, type(fun/var), return type or var scope]
+
+    args
+        symbol_table: list of identifiers from scanner output.
+
+    returns
+        symbol_table: list of lists in parser format. [identifier, type(fun/var), return type or var scope]
+    """
+
+    for i, identifier in enumerate(symbol_table):
+        symbol_table[i] = [identifier, None, None]
+
+    return symbol_table
 
 
 def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
@@ -31,6 +67,7 @@ def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
 
     stack = ['$', non_terminals[0]]  # stack with symbols to match
     input_pointer = 0   # pointer to traverse input
+    symbol_table = initialize_symbol_table(symbol_table)
 
     current_nt = ''
 
@@ -46,16 +83,32 @@ def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
 
             if token == 'ID' and current_nt == 'declaration':  # matched global fun or var
                 next_token = id_to_token(input[input_pointer + 1][1])
+                identifier = input[input_pointer][2] - 1
                 if next_token == '(':
-                    symbol_table[input[input_pointer][2] - 1] = [symbol_table[input[input_pointer]
-                                                                              [2] - 1]] + ['function', id_to_token(input[input_pointer - 1][1])]
+                    fun_type = id_to_token(input[input_pointer - 1][1])
+                    if symbol_table[identifier][0] == 'main':
+                        # if not equal, neither is None. Overwriting main
+                        if symbol_table[identifier][1] != symbol_table[identifier][2]:
+                            raise Exception(
+                                f'SEMANTIC ERROR in line{input[input_pointer][0]}: Function void can only be declared once')
+                        if fun_type != 'void' or id_to_token(input[input_pointer + 2][1]) != 'void' or id_to_token(input[input_pointer + 3][1]) != ')':
+                            raise Exception(
+                                f'SEMANTIC ERROR in line{input[input_pointer][0]}: Function main must be type void with single parameter void')
+
+                    symbol_table[identifier][1] = 'function'
+                    symbol_table[identifier][2] = fun_type
+
+                    print(
+                        f'matched function: {symbol_table[identifier]}')
+
                 else:
-                    symbol_table[input[input_pointer][2] - 1] = [symbol_table[input[input_pointer]
-                                                                              [2] - 1]] + ['var', 'global']
+                    symbol_table[identifier][1] = 'var'
+                    symbol_table[identifier][2] = 'global'
 
             if token == 'ID' and current_nt == "var_declaration":   # matched local var
-                symbol_table[input[input_pointer][2] - 1] = [
-                    symbol_table[input[input_pointer][2] - 1]] + ['var', 'local']
+                identifier = input[input_pointer][2] - 1
+                symbol_table[identifier][1] = 'var'
+                symbol_table[identifier][2] = 'local'
 
             stack.pop()  # remove from stack
             input_pointer += 1  # traverse input
@@ -83,7 +136,11 @@ def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
     if stack[-1] == '$' and token == '$':  # program ended correctly
         print('-----------SUCCESS-----------')
         show_symbol_table(symbol_table)
-        return
+        if last_fun_main(symbol_table):
+            return True
+        else:
+            raise Exception(
+                "SEMANTIC: Last function declaration must be void main(void){}")
     elif input_pointer >= len(input):   # input incomplete
         print(f'stack: {stack}\ttoken: {token}')
         raise Exception(

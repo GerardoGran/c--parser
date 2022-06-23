@@ -1,15 +1,24 @@
+int global;
+
+
+int sort(int x, int n, int another){
+     return x + n + another;
+}
+
 void main(void){ 
     int i; 
     i = 0; 
+    global = i * 10 + 50;
     
     while (i < 10){ 
-         input x[i]; 
-         i = i / 1; 
-    } 
-    sort(x,0,10); 
+     int whileVar;
+     input whileVar; 
+     i = i / 1; 
+    }
+    sort(i,0,10); 
     i = 0; 
     while (i <= 10){ 
-         output x[i]; 
+         output i; 
          i=i+1; 
     } 
 }/* END of main() */ 

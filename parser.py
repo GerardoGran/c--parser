@@ -24,7 +24,10 @@ def show_symbol_table(symbol_table: list):
     args
         symbol_table: list of identifiers in format {identifier: [type(fun/var), return type or var scope]}
     """
+    print(symbol_table)
+
     for entry in symbol_table:
+        entry = map(lambda x: 'None' if x is None else x, entry)
         print('\t'.join(entry))
     return
 
@@ -44,6 +47,36 @@ def initialize_symbol_table(symbol_table: list) -> list:
         symbol_table[i] = [identifier, None, None]
 
     return symbol_table
+
+
+def get_global_variables(symbol_table: list) -> set:
+    """
+    Gets set of global variables in format {('name', scope_lvl)}
+    """
+    globals = set()
+    for entry in symbol_table:
+        if entry[2] == 'global':
+            globals.add((entry[0], -1))
+    return globals
+
+
+def remove_level_of_scope(vars: set, scope_lvl: int) -> set:
+    """
+    Removes all vars lower that the specified level of scope, making them inaccessible
+    """
+    scoped_vars = set()
+    for var in vars:
+        if var[1] < scope_lvl:
+            scoped_vars.add(var)
+
+    return scoped_vars
+
+
+def in_scope(var_name: str, scoped_vars: set) -> bool:
+    for var in scoped_vars:
+        if var_name == var[0]:
+            return True
+    return False
 
 
 def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
@@ -71,6 +104,9 @@ def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
 
     current_nt = ''
 
+    current_scope = set()  # set of accessible variables in scope
+    scope_lvl = 0   # lvl of scope for vars
+
     while stack[-1] != '$':
         top = stack[-1]  # assign top to variable for legibility
         # current token from input
@@ -81,35 +117,103 @@ def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
         if top == token:    # if match
             print(f'matched {token}. nt: {current_nt}')
 
-            if token == 'ID' and current_nt == 'declaration':  # matched global fun or var
-                next_token = id_to_token(input[input_pointer + 1][1])
-                identifier = input[input_pointer][2] - 1
-                if next_token == '(':
-                    fun_type = id_to_token(input[input_pointer - 1][1])
-                    if symbol_table[identifier][0] == 'main':
-                        # if not equal, neither is None. Overwriting main
-                        if symbol_table[identifier][1] != symbol_table[identifier][2]:
+            if token == 'ID':   # matched ID
+                identifier = input[input_pointer][2] - 1  # identifier position
+                identifier_name = symbol_table[identifier][0]
+                print(identifier_name)
+                if current_nt == 'declaration':  # matched global fun or var
+
+                    next_token = id_to_token(input[input_pointer + 1][1])
+
+                    if next_token == '(':   # matched fun
+                        current_scope = get_global_variables(symbol_table)
+                        print(f'current_scope: {current_scope}')
+                        fun_type = id_to_token(input[input_pointer - 1][1])
+                        if identifier_name == 'main':   # matched main function
+                            # if not equal, neither is None. Overwriting main
+                            if symbol_table[identifier][1] != None:
+                                raise Exception(
+                                    f'SEMANTIC ERROR in line {input[input_pointer][0]}: Function void can only be declared once')
+                            if fun_type != 'void' or id_to_token(input[input_pointer + 2][1]) != 'void' or id_to_token(input[input_pointer + 3][1]) != ')':
+                                raise Exception(
+                                    f'SEMANTIC ERROR in line {input[input_pointer][0]}: Function main must be type void with single parameter void')
+
+                        symbol_table[identifier][1] = 'function'
+                        symbol_table[identifier][2] = fun_type
+
+                        print(
+                            f'matched function: {symbol_table[identifier]}')
+
+                    else:   # matched global var
+                        if identifier_name == 'main':
                             raise Exception(
-                                f'SEMANTIC ERROR in line{input[input_pointer][0]}: Function void can only be declared once')
-                        if fun_type != 'void' or id_to_token(input[input_pointer + 2][1]) != 'void' or id_to_token(input[input_pointer + 3][1]) != ')':
-                            raise Exception(
-                                f'SEMANTIC ERROR in line{input[input_pointer][0]}: Function main must be type void with single parameter void')
+                                f'SEMANTIC ERROR in line {input[input_pointer][0]}: Variable cannot be named main')
 
-                    symbol_table[identifier][1] = 'function'
-                    symbol_table[identifier][2] = fun_type
+                        symbol_table[identifier][1] = 'var'
+                        symbol_table[identifier][2] = 'global'
 
-                    print(
-                        f'matched function: {symbol_table[identifier]}')
+                        current_scope = current_scope.union(
+                            get_global_variables(symbol_table))
+                        print(f'current_scope: {current_scope}')
 
-                else:
+                if current_nt == 'var_declaration':   # matched local var
+                    if identifier_name == 'main':
+                        raise Exception(
+                            f'SEMANTIC ERROR in line {input[input_pointer][0]}: Variable cannot be named main')
                     symbol_table[identifier][1] = 'var'
-                    symbol_table[identifier][2] = 'global'
+                    symbol_table[identifier][2] = 'local'
+                    current_scope.add((identifier_name, scope_lvl))
+                    print(f'current_scope: {current_scope}')
 
-            if token == 'ID' and current_nt == "var_declaration":   # matched local var
-                identifier = input[input_pointer][2] - 1
-                symbol_table[identifier][1] = 'var'
-                symbol_table[identifier][2] = 'local'
+                if current_nt == 'statement':   # assigning var or calling function
+                    next_token = id_to_token(input[input_pointer + 1][1])
+                    if next_token == '(':  # calling function
+                        # if equal, function has not been declared.
+                        if symbol_table[identifier][1] == None:
+                            raise Exception(
+                                f'SEMANTIC ERROR in line {input[input_pointer][0]}: Function {identifier_name} has not been declared')
+                        elif symbol_table[identifier][1] != 'function':
+                            raise Exception(
+                                f'SEMANTIC ERROR in line {input[input_pointer][0]}: {identifier_name} is not a function and cannot be called')
+                        elif identifier_name == 'main':
+                            raise Exception(
+                                f'SEMANTIC ERROR in line {input[input_pointer][0]}: main function cannot be called')
+                    elif next_token == '=':  # assigning variable
+                        if symbol_table[identifier][1] == None:
+                            raise Exception(
+                                f'SEMANTIC ERROR in line {input[input_pointer][0]}: Var {identifier_name} has not been declared')
+                        elif symbol_table[identifier][1] == 'function':
+                            raise Exception(
+                                f'SEMANTIC ERROR in line {input[input_pointer][0]}: Cannot assign value to function {identifier_name}')
+                        elif not in_scope(identifier_name, current_scope):
+                            raise Exception(
+                                f'SEMANTIC ERROR in line {input[input_pointer][0]}: {identifier_name} not in scope of statement')
 
+                if current_nt == 'param':  # parameters in function declaration
+                    # only exists in params
+                    if symbol_table[identifier][1] == symbol_table[identifier][2]:
+                        # both equal to allow overwriting in global or local variables
+                        symbol_table[identifier][1] = 'param'
+                        symbol_table[identifier][2] = 'param'
+                        current_scope.add((identifier_name, scope_lvl))
+                        print(f'current_scope: {current_scope}')
+
+                if current_nt == 'factor':  # doing math
+                    # if function does not return value
+                    if symbol_table[identifier][2] == 'void':
+                        raise Exception(
+                            f'SEMANTIC ERROR in line {input[input_pointer][0]}: {identifier_name} does not return a value. Cannot be factor')
+                    elif symbol_table[identifier][1] != 'function' and not in_scope(identifier_name, current_scope):
+                        raise Exception(
+                            f'SEMANTIC ERROR in line {input[input_pointer][0]}: {identifier_name} not in scope of statement')
+
+                # if current_nt == 'var':  # var is only accessed in input
+
+            elif token == '{':
+                scope_lvl += 1
+            elif token == '}':
+                current_scope = remove_level_of_scope(current_scope, scope_lvl)
+                scope_lvl -= 1
             stack.pop()  # remove from stack
             input_pointer += 1  # traverse input
 
@@ -153,7 +257,7 @@ def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
 if __name__ == "__main__":
     # sys.tracebacklimit = 0
 
-    code_file = "test/using.txt"
+    code_file = "test/test1.txt"
 
     # Run scanner
     scanner_output, number_symbol_table, identifier_symbol_table = run_scanner(

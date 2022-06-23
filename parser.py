@@ -5,35 +5,47 @@ from util.token_dict import id_to_token
 
 
 def LL1(grammar: dict, parse_table: dict, input: list):
+    """
+    Runs LL(1) Parsing Algorithm.
+
+    args
+        grammar: dict representing grammar derived from .txt
+        parse_table: dict of dicts representing LL(1) parsing table
+        input: list of lists from scanner output. Must not be empty.
+
+    returns
+        bool indicating success.
+    """
     # Validate input
     if len(input) == 1 and input[0][1] == 30:
         raise Exception("INPUT: code file cannot be empty")
 
-    # input.append('$')
-
     non_terminals = list(grammar.keys())
     productions = gram.enumerate_productions(grammar)
 
-    stack = ['$', non_terminals[0]]
-    input_pointer = 0
+    stack = ['$', non_terminals[0]]  # stack with symbols to match
+    input_pointer = 0   # pointer to traverse input
 
     while stack[-1] != '$':
-        top = stack[-1]
-        if input_pointer < len(input):
-            token = id_to_token(input[input_pointer][1])
-        print(f'stack: {stack}\ttoken: {token}')
-        if top == token:
-            print(f'matched {token}')
-            stack.pop()
-            input_pointer += 1
+        top = stack[-1]  # assign top to variable for legibility
+        # current token from input
+        token = id_to_token(input[input_pointer][1])
 
-        elif top not in non_terminals:
+        print(f'stack: {stack}\ttoken: {token}')
+
+        if top == token:    # if match
+            print(f'matched {token}')
+            stack.pop()  # remove from stack
+            input_pointer += 1  # traverse input
+
+        elif top not in non_terminals:  # if TopStack is terminal without match
             raise Exception(
                 f"STACK: Expected {top} got {token} in line {input[input_pointer][0]}")
+        # if TopStack is nt and cannot have token
         elif parse_table[top][token] == "ERROR":
             raise Exception(
                 f"TABLE: Expected {top} got {token} in line {input[input_pointer][0]}")
-        else:
+        else:   # traverse Parse Table to new production
             production_number = parse_table[top][token]  # production to go to
             # symbols in RHS of production
             production_symbols = productions[production_number]
@@ -46,19 +58,19 @@ def LL1(grammar: dict, parse_table: dict, input: list):
     if stack[-1] == '$' and token == '$':  # program ended correctly
         print('-----------SUCCESS-----------')
         return
-    elif input_pointer >= len(input):
+    elif input_pointer >= len(input):   # input incomplete
         print(f'stack: {stack}\ttoken: {token}')
         raise Exception(
             f'INPUT: Input ended prematurely, top of stack: {stack[-1]}')
     else:
-        print(f'stack: {stack}\ttoken: {token}')
+        print(f'stack: {stack}\ttoken: {token}')    # did not end correctly
         raise Exception(f'TOP: Did not end on $, got {token}')
 
 
 if __name__ == "__main__":
     sys.tracebacklimit = 0
 
-    code_file = "test/test9.txt"
+    code_file = "test/example2.txt"
 
     # Run scanner
     scanner_output, number_symbol_table, identifier_symbol_table = run_scanner(

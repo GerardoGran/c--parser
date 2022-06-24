@@ -24,7 +24,6 @@ def show_symbol_table(symbol_table: list):
     args
         symbol_table: list of identifiers in format {identifier: [type(fun/var), return type or var scope]}
     """
-    print(symbol_table)
 
     for entry in symbol_table:
         entry = map(lambda x: 'None' if x is None else x, entry)
@@ -160,7 +159,30 @@ def handle_error_stack(token: str, line: int, productions: dict, n: int):
 
 
 def handle_error_table(top: str, token: str, line: int):
-    if token in ['!=', '==', '<', '<=', '>', '>=']:
+
+    if top == "program":
+        error = f"Program must begin with a declaration."
+    elif top == "declaration_list":
+        error = f"Declaration must begin with int or void."
+    elif top == "declaration":
+        error = f"Declaration must begin with int or void."
+    elif top == "declaration'":
+        error = f"A function declaration must include '(params)'. Variable name must be followed by ';' or '[SIZE]'."
+    elif top == "var_declaration":
+        error = f"Variables can only be int."
+    elif top == "var_declaration'":
+        error = f"Variable name must be followed by ';' or '[SIZE]'."
+    elif top == "params":
+        error = f"Parameter definition must be list of ints or a single void."
+    elif top == "param_list":
+        error = f"List of parameters must be separated by commas ',' and closed by a parenthesis ')'."
+    elif top == "param":
+        error = f"Params can only be of type int once another int has been declared as a param."
+    elif top == "param'":
+        error = f"List of parameters must be separated by commas ',' and closed by a parenthesis ')'."
+    elif top == "compound_stmt":
+        error = f"The body of a statement must begin with brackets '{{'."
+    elif token in ['!=', '==', '<', '<=', '>', '>=']:
         error = f"Relational operators may only exist in a relational expression."
     elif token == 'NUM':
         error = f"Numbers may only be used in relational and arithmetic expressions, to access arrays or as params."
@@ -186,28 +208,6 @@ def handle_error_table(top: str, token: str, line: int):
         error = f"If and While statements may only be used inside a function body."
     elif token == 'return':
         error = f"Return statements may only be used inside function declarations."
-    elif top == "program":
-        error = f"Program must begin with a declaration."
-    elif top == "declaration_list":
-        error = f"Declaration must begin with int or void."
-    elif top == "declaration":
-        error = f"Declaration must begin with int or void."
-    elif top == "declaration'":
-        error = f"A function declaration must include '(params)'. Variable name must be followed by ';' or '[SIZE]'."
-    elif top == "var_declaration":
-        error = f"Variables can only be int."
-    elif top == "var_declaration'":
-        error = f"Variable name must be followed by ';' or '[SIZE]'."
-    elif top == "params":
-        error = f"Parameter definition must be list of ints or a single void."
-    elif top == "param_list":
-        error = f"List of parameters must be separated by commas ',' and closed by a parenthesis ')'."
-    elif top == "param":
-        error = f"Params can only be of type int once another int has been declared as a param."
-    elif top == "param'":
-        error = f"List of parameters must be separated by commas ',' and closed by a parenthesis ')'."
-    elif top == "compound_stmt":
-        error = f"The body of a statement must begin with brackets '{{'."
     elif top == "local_declarations":
         error = f""
     elif top == "statement_list":
@@ -380,9 +380,8 @@ def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
                     if symbol_table[identifier][2] == 'void':
                         raise Exception(
                             f'SEMANTIC ERROR in line {input[input_pointer][0]}: {identifier_name} does not return a value. Cannot be factor')
-                    elif symbol_table[identifier][1] != 'function' and not in_scope(identifier_name, current_scope):
-                        raise Exception(
-                            f'SEMANTIC ERROR in line {input[input_pointer][0]}: {identifier_name} not in scope of statement')
+                    # elif symbol_table[identifier][1] != 'function' and not in_scope(identifier_name, current_scope):
+                        # raise Exception(f'SEMANTIC ERROR in line {input[input_pointer][0]}: {identifier_name} not in scope of statement')
 
                 # if current_nt == 'var':  # var is only accessed in input
 
@@ -433,7 +432,7 @@ def LL1(grammar: dict, parse_table: dict, input: list, symbol_table: list):
 if __name__ == "__main__":
     # sys.tracebacklimit = 0
 
-    code_file = "test/using.txt"
+    code_file = "test/test2.txt"
 
     # Run scanner
     scanner_output, number_symbol_table, identifier_symbol_table = run_scanner(

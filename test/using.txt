@@ -1,20 +1,24 @@
-int var;
-int otherVar;
+int global;
 
-int gimmeFifty(void) {
-    int localVar;
-    int localVarTwo;
+int sort(int x, int n, int another){
+     return x + n + another;
+}
 
+void main(void){ 
+    int i; 
+    int arr[5];
+    i = 0; 
+    global = i * 10 + 50;
     
-    localVar = 10;
-    localVarTwo = localVar + 10;
-    return 50;
-}
-
-int finalVar;
-
-void main(void) {
-    int finalLocalVar;
-    int x;
-    finalLocalVar = 69;
-}
+    while (i < 10){ 
+     int whileVar;
+     input whileVar; 
+     i = i / 1; 
+    } 
+    sort(i,0,10); 
+    i = 0; 
+    while (i <= 10){ 
+         output i; 
+         i=i+1; 
+    } 
+}/* END of main() */ 

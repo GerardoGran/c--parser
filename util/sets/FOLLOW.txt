@@ -1,0 +1,33 @@
+FOLLOW(program) = {$}
+FOLLOW(declaration_list) = {$}
+FOLLOW(declaration) = {$, void, int}
+FOLLOW(declaration') = {void, $, int}
+FOLLOW(var_declaration) = {if, return, input, ID, {, int, while, }, output}
+FOLLOW(var_declaration') = {if, return, input, ID, {, int, while, }, output}
+FOLLOW(params) = {)}
+FOLLOW(param_list) = {)}
+FOLLOW(param) = {), ,}
+FOLLOW(param') = {), ,}
+FOLLOW(compound_stmt) = {void, $, int}
+FOLLOW(local_declarations) = {if, while, return, input, }, output, ID, {}
+FOLLOW(statement_list) = {}}
+FOLLOW(statement) = {if, return, else, input, ID, {, while, }, output}
+FOLLOW(statement') = {if, return, else, input, ID, {, while, }, output}
+FOLLOW(selection_stmt) = {if, return, else, input, ID, {, while, }, output}
+FOLLOW(return_stmt) = {if, return, else, input, ID, {, while, }, output}
+FOLLOW(var) = {;}
+FOLLOW(var') = {;, =}
+FOLLOW(expression) = {;, )}
+FOLLOW(expression') = {;, )}
+FOLLOW(relop) = {(, NUM, ID}
+FOLLOW(arithmetic_expression) = {>=, ,, !=, ], >, ;, ==, ), <=, <}
+FOLLOW(arithmetic_expression') = {>=, ,, !=, ], >, ;, ==, ), <=, <}
+FOLLOW(addop) = {(, NUM, ID}
+FOLLOW(term) = {+, >=, -, !=, ], ==, <=, <, ,, >, ;, )}
+FOLLOW(term') = {+, >=, ,, -, !=, ], >, ;, ==, ), <=, <}
+FOLLOW(mulop) = {(, NUM, ID}
+FOLLOW(factor) = {+, /, >=, -, !=, ], ==, <=, <, *, ,, >, ;, )}
+FOLLOW(factor') = {+, /, >=, -, !=, ], ==, <=, <, *, ,, >, ;, )}
+FOLLOW(call) = {+, /, >=, -, !=, ], ==, <=, <, *, ,, ;, >, )}
+FOLLOW(args) = {)}
+FOLLOW(args_list) = {)}

@@ -1,0 +1,33 @@
+program->declaration declaration_list | ε
+declaration_list->declaration declaration_list | ε
+declaration->int ID declaration' | void ID ( params ) compound_stmt
+declaration'->; | [ NUM ] ; | ( params ) compound_stmt
+var_declaration->int ID var_declaration'
+var_declaration'->; | [ NUM ] ;
+params->param param_list | void
+param_list->, param param_list | ε
+param->int ID param'
+param'->[ ] | ε
+compound_stmt->{ local_declarations statement_list }
+local_declarations->var_declaration local_declarations | ε
+statement_list->statement statement_list | ε
+statement->ID statement' | { local_declarations statement_list } | if ( expression ) statement selection_stmt | while ( expression ) statement | return return_stmt | input var ; | output expression ;
+statement'->var' = expression ; | ( call ;
+selection_stmt->else statement | ε
+return_stmt->; | expression ;
+var->ID var'
+var'->[ arithmetic_expression ] | ε
+expression->arithmetic_expression expression'
+expression'->relop arithmetic_expression expression' | ε
+relop-><= | < | > | >= | == | !=
+arithmetic_expression->term arithmetic_expression'
+arithmetic_expression'->addop term arithmetic_expression' | ε
+addop->+ | -
+term->factor term'
+term'->mulop factor term' | ε
+mulop->* | /
+factor->( arithmetic_expression ) | ID factor' | NUM
+factor'->[ arithmetic_expression ] | ε | ( call
+call->args ) | )
+args->arithmetic_expression args_list
+args_list->, arithmetic_expression args_list | ε

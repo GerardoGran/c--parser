@@ -1,0 +1,26 @@
+int global;
+
+int sort(int x, int n, int another){
+    int scoped;
+     return x + n + another;
+}
+
+void main(void){ 
+    int i; 
+    int arr[5];
+    i = 0; 
+    scoped = 1;
+    global = i * 10 + 50;
+    
+    while (i < 10){ 
+     int whileVar;
+     input whileVar; 
+     i = i / 1; 
+    } 
+    sort(i,0,10); 
+    i = 0; 
+    while (i <= 10){ 
+         output i; 
+         i=i+1; 
+    } 
+}/* END of main() */ 
